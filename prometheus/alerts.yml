@@ -1,0 +1,37 @@
+groups:
+  - name: api_alerts
+    rules:
+      # Alerta si la tasa de errores supera el 20%
+      - alert: AltaTasaDeErrores
+        expr: |
+          sum(rate(http_errors_total[1m])) /
+          sum(rate(http_requests_total[1m])) > 0.2
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tasa de errores alta"
+          description: "Más del 20% de los requests están fallando."
+
+      # Alerta si la latencia p95 supera 3 segundos
+      - alert: AltaLatencia
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 3
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Latencia p95 elevada"
+          description: "El percentil 95 de latencia supera los 3 segundos."
+
+      # Alerta si la API deja de responder
+      - alert: APINoDisponible
+        expr: up{job="api-monitoreo"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "API no disponible"
+          description: "Prometheus no puede hacer scraping de la API."

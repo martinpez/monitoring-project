@@ -1,0 +1,22 @@
+global:
+  scrape_interval: 15s        # Cada cuánto recolectar métricas
+  evaluation_interval: 15s    # Cada cuánto evaluar reglas de alertas
+  scrape_timeout: 10s
+
+# ── Reglas de alertas ─────────────────────────────────────────────────────────
+rule_files:
+  - "alerts.yml"
+
+# ── Targets de scraping ───────────────────────────────────────────────────────
+scrape_configs:
+  # La API Express/TypeScript
+  - job_name: 'api-monitoreo'
+    static_configs:
+      - targets: ['api:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  # El propio Prometheus (auto-monitoreo)
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
